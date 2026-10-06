@@ -1,0 +1,28 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+body { @apply bg-bg text-slate-100 antialiased; }
+h1, h2, h3 { font-family: var(--font-display), system-ui, sans-serif; }
+:focus-visible { outline: 2px solid #3ee6a0; outline-offset: 2px; }
+
+@layer components {
+  .card { @apply rounded-xl border border-line bg-panel; }
+  .btn { @apply inline-flex items-center justify-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-bg transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40; }
+  .btn-ghost { @apply inline-flex items-center justify-center rounded-lg border border-line px-3 py-2 text-sm text-slate-200 transition hover:border-brand/60; }
+  .input { @apply w-full rounded-lg border border-line bg-bg px-3 py-2.5 text-sm outline-none placeholder:text-muted focus:border-brand; }
+  .chip { @apply rounded-full border border-line px-3 py-1 font-mono text-xs text-slate-300 transition hover:border-brand; }
+}
+
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track { display: flex; gap: 1rem; width: max-content; animation: marquee 40s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+/* Columnas verticales de la portada */
+@keyframes rise { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes fall { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+.col-rise { animation: rise 38s linear infinite; }
+.col-fall { animation: fall 46s linear infinite; }
+@keyframes pop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+.pop-in { animation: pop .5s .4s cubic-bezier(.2,.9,.3,1.2) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .col-rise, .col-fall, .pop-in { animation: none !important; }
+}
