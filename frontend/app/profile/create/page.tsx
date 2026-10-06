@@ -39,7 +39,20 @@ function CreateProfileInner() {
   return (
     <div className="grid gap-6 md:grid-cols-[400px_1fr]">
       <form onSubmit={submit} className="card space-y-3 p-6">
-        <h1 className="text-xl font-semibold">Crea tu perfil</h1>
+        <div className="flex items-center justify-between border-b border-line pb-3">
+          <div>
+            <h1 className="text-xl font-semibold">Crea tu perfil</h1>
+            <p className="text-xs text-muted">Ofrece tus servicios en el marketplace</p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <Link href="/marketplace" className="text-xs font-semibold text-brand hover:underline">
+              ✦ Ir al Marketplace
+            </Link>
+            <button type="button" onClick={() => { if (user) setUser({ ...user, role: 'client' }); router.push('/marketplace'); }} className="text-[11px] text-muted hover:text-slate-200">
+              Cambiar a Cliente
+            </button>
+          </div>
+        </div>
         <label className="flex cursor-pointer items-center gap-4 rounded-lg border border-dashed border-line p-3 hover:border-brand">
           {avatar ? <img src={avatar} alt="" className="h-16 w-16 rounded-full object-cover" /> : <span className="grid h-16 w-16 place-items-center rounded-full bg-line text-2xl">📷</span>}
           <span className="text-sm">{avatar ? 'Cambiar foto' : 'Agregar foto de perfil'}</span>

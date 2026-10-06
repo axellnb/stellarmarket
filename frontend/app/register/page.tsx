@@ -31,8 +31,12 @@ function Access() {
     if (next) return next;
     return u.role === 'client' ? (u.prefs?.length ? '/marketplace' : '/preferences') : u.profileId ? `/freelancer/${u.profileId}` : '/profile/create';
   };
-  // Si ya hay sesión, no tiene sentido mostrar el acceso
-  useEffect(() => { if (ready && user && !warp) router.replace(dest(user)); }, [ready, user]); // eslint-disable-line
+  // Si el usuario ya está conectado y no seleccionó rol o modo en la URL, ir a su destino.
+  useEffect(() => {
+    if (ready && user && !warp && !sp.get('mode') && !sp.get('role')) {
+      router.replace(dest(user));
+    }
+  }, [ready, user]); // eslint-disable-line
 
   const enterAsGuest = () => {
     const guestUser: User = {

@@ -44,10 +44,7 @@ export default function Home() {
   const { ready, user } = useApp();
   const [q, setQ] = useState('');
 
-  // Quien ya tiene sesión no necesita la portada.
-  useEffect(() => {
-    if (ready && user) router.replace(user.role === 'client' ? '/marketplace' : user.profileId ? `/freelancer/${user.profileId}` : '/profile/create');
-  }, [ready, user, router]);
+  // Portada libre: no fuerza redirección si el usuario entra manualmente o navega.
 
   // Búsqueda directa al Marketplace para explorar como invitado o cliente
   const search = (e: React.FormEvent) => { e.preventDefault(); router.push(`/marketplace?q=${encodeURIComponent(q)}`); };
