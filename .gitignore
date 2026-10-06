@@ -20,3 +20,5 @@ dist/
 *.pem
 .vscode/
 .idea/
+.vercel
+.env*
