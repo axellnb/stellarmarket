@@ -58,4 +58,4 @@ function Market() {
     </div>
   );
 }
-export default function Page() { return <RequireAuth><Suspense fallback={<p className="text-muted">Cargando…</p>}><Market /></Suspense></RequireAuth>; }
+export default function Page() { return <RequireAuth allowGuest><Suspense fallback={<p className="text-muted">Cargando…</p>}><Market /></Suspense></RequireAuth>; }

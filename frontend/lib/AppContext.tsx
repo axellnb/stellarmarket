@@ -5,7 +5,7 @@ import { connectFreighter, fetchAccount, fundWithFriendbot, silentAddress, Walle
 
 export type Role = 'client' | 'freelancer';
 export interface Wallet { address: string; balance: number; spendable: number; funded: boolean }
-export interface User { name: string; email: string; role: Role; prefs?: string[]; profileId?: string; token?: string }
+export interface User { name: string; email: string; role: Role; prefs?: string[]; profileId?: string; token?: string; isGuest?: boolean }
 interface Ctx {
   ready: boolean;
   user: User | null; setUser: (u: User | null) => void; logout: () => Promise<void>;

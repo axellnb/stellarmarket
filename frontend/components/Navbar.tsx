@@ -37,21 +37,24 @@ export default function Navbar() {
             <span className="font-display text-lg font-semibold tracking-tight">Stellar<span className="text-brand">Work</span></span>
           </Link>
           <nav className="hidden items-center gap-7 text-sm text-slate-300 md:flex">
-            {user ? (<>
-              <Link href="/marketplace" className="hover:text-brand">Marketplace</Link>
-              {acct && <Link href={acct.href} className="hover:text-brand">{acct.label}</Link>}
-            </>) : (<>
-              <Link href="/#categorias" className="hover:text-brand">Categorías</Link>
-              <Link href="/#como-funciona" className="hover:text-brand">Cómo funciona</Link>
-              <Link href="/register?role=freelancer" className="hover:text-brand">Ofrecer servicios</Link>
-            </>)}
+            <Link href="/marketplace" className="hover:text-brand">Marketplace</Link>
+            {user && !user.isGuest && acct && <Link href={acct.href} className="hover:text-brand">{acct.label}</Link>}
+            <Link href="/#categorias" className="hover:text-brand">Categorías</Link>
+            <Link href="/#como-funciona" className="hover:text-brand">Cómo funciona</Link>
           </nav>
         </div>
 
         {!ready ? <div className="h-9 w-40" /> : !user ? (
           <div className="flex items-center gap-2">
+            <Link href="/marketplace" className="btn-ghost text-xs text-brand font-medium hidden sm:inline-flex">✦ Entrar como invitado</Link>
             <Link href="/register?mode=login" className="btn-ghost">Iniciar sesión</Link>
             <Link href="/register" className="btn">Registrarme</Link>
+          </div>
+        ) : user.isGuest ? (
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-xs text-brand font-medium">✦ Modo Invitado</span>
+            <Link href="/register" className="btn text-xs">Crear cuenta</Link>
+            <button onClick={async () => await logout()} className="btn-ghost text-xs text-muted">Salir</button>
           </div>
         ) : (
           <div className="flex items-center gap-2">

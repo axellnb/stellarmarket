@@ -49,9 +49,8 @@ export default function Home() {
     if (ready && user) router.replace(user.role === 'client' ? '/marketplace' : user.profileId ? `/freelancer/${user.profileId}` : '/profile/create');
   }, [ready, user, router]);
 
-  // Sin sesión, cualquier búsqueda o categoría pasa primero por el acceso.
-  const gate = (target: string) => `/register?role=client&next=${encodeURIComponent(target)}`;
-  const search = (e: React.FormEvent) => { e.preventDefault(); router.push(gate(`/marketplace?q=${encodeURIComponent(q)}`)); };
+  // Búsqueda directa al Marketplace para explorar como invitado o cliente
+  const search = (e: React.FormEvent) => { e.preventDefault(); router.push(`/marketplace?q=${encodeURIComponent(q)}`); };
 
   return (
     <div>
@@ -62,13 +61,18 @@ export default function Home() {
           <div>
             <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight md:text-7xl">Contrata talento freelance y págale en XLM.</h1>
             <p className="mt-6 max-w-lg text-lg text-slate-400">Diseño, desarrollo, video y marketing. El pago sale de tu wallet y llega directo a la del freelancer, sin intermediarios.</p>
-            <form onSubmit={search} className="mt-8 flex max-w-xl overflow-hidden rounded-xl border border-line bg-panel focus-within:border-brand">
-              <input value={q} onChange={e => setQ(e.target.value)} aria-label="Buscar un servicio" placeholder="Busca un servicio, por ejemplo «diseño de logo»" className="w-full bg-transparent px-4 py-4 text-sm outline-none placeholder:text-muted" />
-              <button className="bg-brand px-7 text-sm font-semibold text-bg hover:brightness-110">Buscar</button>
-            </form>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <form onSubmit={search} className="flex max-w-xl flex-1 overflow-hidden rounded-xl border border-line bg-panel focus-within:border-brand">
+                <input value={q} onChange={e => setQ(e.target.value)} aria-label="Buscar un servicio" placeholder="Busca un servicio, por ejemplo «diseño de logo»" className="w-full bg-transparent px-4 py-4 text-sm outline-none placeholder:text-muted" />
+                <button className="bg-brand px-7 text-sm font-semibold text-bg hover:brightness-110">Buscar</button>
+              </form>
+              <Link href="/marketplace" className="flex items-center gap-2 rounded-xl border border-brand/50 bg-panel/60 px-5 py-4 text-sm font-semibold text-brand transition hover:bg-brand hover:text-bg">
+                ✦ Entrar como invitado
+              </Link>
+            </div>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted">
               Populares:
-              {POPULAR.map(p => <Link key={p} href={gate(`/marketplace?q=${encodeURIComponent(p)}`)} className="chip">{p}</Link>)}
+              {POPULAR.map(p => <Link key={p} href={`/marketplace?q=${encodeURIComponent(p)}`} className="chip">{p}</Link>)}
             </div>
             <dl className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
               <div><dt className="text-muted">Comisión de red</dt><dd className="font-mono text-lg">0.00001 XLM</dd></div>
@@ -99,7 +103,7 @@ export default function Home() {
         <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight md:text-4xl">Encuentra el servicio que tu proyecto necesita</h2>
         <div className="mt-10 grid gap-4 md:auto-rows-[150px] md:grid-cols-4">
           {CATS.map(c => (
-            <Link key={c.n} href={gate(`/marketplace?category=${c.n}`)} className={`group relative flex flex-col justify-end overflow-hidden rounded-2xl p-6 ${c.span}`} style={{ background: `linear-gradient(135deg, ${c.a}, ${c.b})` }}>
+            <Link key={c.n} href={`/marketplace?category=${encodeURIComponent(c.n)}`} className={`group relative flex flex-col justify-end overflow-hidden rounded-2xl p-6 ${c.span}`} style={{ background: `linear-gradient(135deg, ${c.a}, ${c.b})` }}>
               <span className="absolute inset-0 bg-black/20 transition group-hover:bg-black/0" />
               <span className="relative font-display text-2xl font-semibold text-white">{c.n}</span>
               <span className="relative text-sm text-white/80">{c.d}</span>

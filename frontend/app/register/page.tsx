@@ -34,6 +34,20 @@ function Access() {
   // Si ya hay sesión, no tiene sentido mostrar el acceso
   useEffect(() => { if (ready && user && !warp) router.replace(dest(user)); }, [ready, user]); // eslint-disable-line
 
+  const enterAsGuest = () => {
+    const guestUser: User = {
+      name: 'Invitado',
+      email: 'invitado@stellarwork.app',
+      role: 'client',
+      isGuest: true,
+      token: 'guest-token-' + Date.now(),
+      prefs: []
+    };
+    setUser(guestUser);
+    const next = safeNext(sp.get('next')) || '/marketplace';
+    router.push(next);
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); if (!role) return;
     setErr(''); setBusy(true);
@@ -88,7 +102,12 @@ function Access() {
               ))}
             </div>
           </div>
-          <p className="relative z-10 pb-6 text-center text-sm text-muted">¿Ya tienes cuenta? Elige tu rol y pulsa «Iniciar sesión».</p>
+          <div className="relative z-10 flex flex-col items-center pb-8 gap-2">
+            <p className="text-sm text-muted">¿Ya tienes cuenta? Elige tu rol y pulsa «Iniciar sesión».</p>
+            <button type="button" onClick={enterAsGuest} className="mt-1 rounded-full border border-brand/50 bg-panel/80 px-6 py-2 text-sm font-semibold text-brand transition hover:bg-brand hover:text-bg">
+              ✦ Entrar como invitado (Explorar Marketplace)
+            </button>
+          </div>
         </div>
       ) : (
         <div className={`relative z-10 grid min-h-screen place-items-center px-4 transition-opacity duration-500 ${warp ? 'opacity-0' : 'opacity-100'}`}>
@@ -110,7 +129,11 @@ function Access() {
             <button className="w-full rounded-lg py-3 text-sm font-semibold text-bg transition hover:brightness-110 disabled:opacity-50" style={{ background: A }} disabled={busy}>
               {busy ? 'Entrando…' : mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}
             </button>
-            <p className="text-xs text-muted">Versión de prueba: puedes iniciar sesión con cualquier correo y contraseña.</p>
+            <div className="pt-2 border-t border-line text-center">
+              <button type="button" onClick={enterAsGuest} className="text-xs font-semibold text-brand hover:underline">
+                ✦ Entrar como invitado (sin crear perfil)
+              </button>
+            </div>
           </form>
         </div>
       )}
