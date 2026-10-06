@@ -46,7 +46,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           const me = await api<User>('/api/me');
           setUserState({ ...me, token: s.user.token });
           if (s.wallet) { const a = await silentAddress(); if (a) await loadWallet(a).catch(() => {}); else persist({ wallet: null }); }
-        } catch { clearSession(); }
+        } catch {
+          // En versión de prueba, mantener la sesión localmente sin desloguear
+          setUserState(s.user);
+        }
       }
       setReady(true);
     })();

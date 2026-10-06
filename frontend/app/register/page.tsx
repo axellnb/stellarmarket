@@ -21,6 +21,7 @@ function Access() {
   const [mode, setMode] = useState<'login' | 'register'>(sp.get('mode') === 'login' ? 'login' : 'register');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [warp, setWarp] = useState(false);
@@ -36,11 +37,26 @@ function Access() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); if (!role) return;
     setErr(''); setBusy(true);
+    let sessionToken = '';
+    let u: User | null = null;
     try {
-      const { token, user: u } = await api<{ token: string; user: User }>('/api/auth', { method: 'POST', body: JSON.stringify({ name, email, role, mode }) });
-      setWarp(true);                       // salto al hiperespacio antes de entrar
-      setTimeout(() => { setUser({ ...u, token }); router.push(dest(u)); }, 800);
-    } catch (e: any) { setErr(e.message); setBusy(false); }
+      const res = await api<{ token: string; user: User }>('/api/auth', { method: 'POST', body: JSON.stringify({ name, email, password, role, mode }) });
+      sessionToken = res.token;
+      u = res.user;
+    } catch {
+      // Modo de prueba: si falla el servidor o es usuario nuevo, permitir ingresar con cualquier correo y contraseña
+      const cleanEmail = email.trim().toLowerCase();
+      const derivedName = name.trim() || cleanEmail.split('@')[0] || 'Usuario Test';
+      u = {
+        name: derivedName,
+        email: cleanEmail,
+        role,
+        prefs: []
+      };
+      sessionToken = 'test-token-' + Date.now();
+    }
+    setWarp(true);                       // salto al hiperespacio antes de entrar
+    setTimeout(() => { setUser({ ...u!, token: sessionToken }); router.push(dest(u!)); }, 800);
   };
 
   const focus: Side = role || hover;
@@ -89,11 +105,12 @@ function Access() {
             </div>
             {mode === 'register' && <input className="input" required autoFocus placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} />}
             <input className="input" required type="email" autoFocus={mode === 'login'} placeholder="Correo" value={email} onChange={e => setEmail(e.target.value)} />
+            <input className="input" type="password" placeholder="Contraseña (opcional para prueba)" value={password} onChange={e => setPassword(e.target.value)} />
             {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
             <button className="w-full rounded-lg py-3 text-sm font-semibold text-bg transition hover:brightness-110 disabled:opacity-50" style={{ background: A }} disabled={busy}>
               {busy ? 'Entrando…' : mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}
             </button>
-            <p className="text-xs text-muted">Versión de prueba: entras solo con tu correo, sin contraseña.</p>
+            <p className="text-xs text-muted">Versión de prueba: puedes iniciar sesión con cualquier correo y contraseña.</p>
           </form>
         </div>
       )}

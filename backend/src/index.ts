@@ -36,18 +36,18 @@ const auth = (role?: Role) => (req: AuthedRequest, res: Response, next: NextFunc
 };
 
 app.post('/api/auth', (req, res) => {
-  const { name, email, role, mode } = req.body || {};
+  const { name, email, role } = req.body || {};
   if (!email || !['client', 'freelancer'].includes(role)) return res.status(400).json({ error: 'Datos inválidos' });
   const key = String(email).trim().toLowerCase();
   let u = users.get(key);
-  if (mode === 'login') {
-    if (!u) return res.status(404).json({ error: 'No existe una cuenta con ese correo. Regístrate primero.' });
+  if (!u) {
+    const derivedName = (name && String(name).trim()) || key.split('@')[0] || 'Usuario Test';
+    u = { name: derivedName, email: key, role, prefs: [] };
+    users.set(key, u);
   } else {
-    if (!name) return res.status(400).json({ error: 'El nombre es obligatorio' });
-    if (u) return res.status(409).json({ error: 'Ese correo ya tiene cuenta. Inicia sesión.' });
-    u = { name, email: key, role, prefs: [] }; users.set(key, u);
+    if (name) u.name = String(name).trim();
+    u.role = role;
   }
-  if (u.role !== role) return res.status(409).json({ error: `Este correo está registrado como ${u.role === 'client' ? 'cliente' : 'freelancer'}` });
   const token = crypto.randomBytes(24).toString('hex');
   sessions.set(token, u.email);
   res.json({ token, user: u });
