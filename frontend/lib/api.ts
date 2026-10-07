@@ -96,6 +96,19 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
       return project as unknown as T;
     }
 
+    if (path.startsWith('/api/me')) {
+      const state = (() => { try { return JSON.parse(localStorage.getItem('sm-state') || '{}'); } catch { return {}; } })();
+      if (state?.user?.name && state?.user?.role) {
+        return state.user as unknown as T;
+      }
+      return {
+        name: 'Usuario Demo',
+        email: 'demo@stellarwork.app',
+        role: 'client',
+        prefs: []
+      } as unknown as T;
+    }
+
     if (path.startsWith('/api/payments/confirm')) {
       return {
         success: true,
