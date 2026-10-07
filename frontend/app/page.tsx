@@ -4,6 +4,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/lib/AppContext';
 import { useXlmPrice, convertXlmToUsd } from '@/lib/useXlmPrice';
+import {
+  DesignIllustration,
+  DevIllustration,
+  VideoIllustration,
+  MarketingIllustration,
+  WritingIllustration,
+  StellarNetworkIllustration,
+} from '@/components/CategoryIllustrations';
 
 type Tile = { t: string; c: string; p: number; h?: boolean };
 const COLS: Tile[][] = [
@@ -30,11 +38,11 @@ const TileCard = ({ x }: { x: Tile }) => {
 };
 
 const CATS = [
-  { n: 'Diseño & Marca', d: 'Logos, branding, UI/UX e ilustración', span: 'md:col-span-2 md:row-span-2' },
-  { n: 'Desarrollo Web3', d: 'Next.js, Soroban y Stellar SDK', span: '' },
-  { n: 'Video & Motion', d: 'Edición 3D y piezas publicitarias', span: '' },
-  { n: 'Marketing Digital', d: 'Campañas, redes y posicionamiento', span: 'md:col-span-2' },
-  { n: 'Escritura & Copy', d: 'Redacción SEO, whitepapers y scripts', span: '' }
+  { n: 'Diseño & Marca', d: 'Logos, branding, UI/UX e ilustración', span: 'md:col-span-2 md:row-span-2', Illus: DesignIllustration },
+  { n: 'Desarrollo Web3', d: 'Next.js, Soroban y Stellar SDK', span: '', Illus: DevIllustration },
+  { n: 'Video & Motion', d: 'Edición 3D y piezas publicitarias', span: '', Illus: VideoIllustration },
+  { n: 'Marketing Digital', d: 'Campañas, redes y posicionamiento', span: 'md:col-span-2', Illus: MarketingIllustration },
+  { n: 'Escritura & Copy', d: 'Redacción SEO, whitepapers y scripts', span: '', Illus: WritingIllustration }
 ];
 
 const POPULAR = ['Diseño de logo', 'Landing page', 'Edición de video', 'Artículo SEO', 'Contrato Soroban'];
@@ -133,7 +141,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categorías */}
+      {/* Categorías con Ilustraciones visuales temáticas */}
       <section id="categorias" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
@@ -146,20 +154,36 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid gap-4 md:auto-rows-[160px] md:grid-cols-4">
-          {CATS.map((c) => (
-            <Link
-              key={c.n}
-              href={`/marketplace?category=${encodeURIComponent(c.n)}`}
-              className={`card-hover group relative flex flex-col justify-end p-6 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl ${c.span}`}
-            >
-              <div className="absolute top-4 right-4 h-8 w-8 rounded-xl border border-white/15 bg-white/5 flex items-center justify-center text-[#3965FA] group-hover:bg-[#3965FA] group-hover:text-white transition-all">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-              </div>
-              <span className="font-display text-xl font-bold text-white group-hover:text-[#3965FA] transition-colors">{c.n}</span>
-              <span className="mt-1 text-xs text-[#99B7FC]/80 leading-relaxed">{c.d}</span>
-            </Link>
-          ))}
+        <div className="grid gap-5 md:auto-rows-[200px] md:grid-cols-4">
+          {CATS.map((c) => {
+            const IllusComp = c.Illus;
+            return (
+              <Link
+                key={c.n}
+                href={`/marketplace?category=${encodeURIComponent(c.n)}`}
+                className={`card-hover group relative flex flex-col justify-between overflow-hidden p-6 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl ${c.span}`}
+              >
+                {/* Ilustración de fondo temática */}
+                <div className="absolute right-0 top-0 w-1/2 h-full opacity-35 group-hover:opacity-60 transition-opacity pointer-events-none">
+                  <IllusComp />
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between">
+                  <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 font-mono text-[11px] font-semibold text-[#99B7FC] backdrop-blur-md">
+                    Servicio Verificado
+                  </span>
+                  <div className="h-9 w-9 rounded-xl border border-white/15 bg-white/5 flex items-center justify-center text-[#3965FA] group-hover:bg-[#3965FA] group-hover:text-white transition-all shadow-md">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                  </div>
+                </div>
+
+                <div className="relative z-10 mt-6">
+                  <span className="font-display text-2xl font-extrabold text-white group-hover:text-[#3965FA] transition-colors">{c.n}</span>
+                  <span className="mt-1 block text-xs text-[#99B7FC]/90 leading-relaxed font-medium">{c.d}</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -179,8 +203,8 @@ export default function Home() {
               ['Conecta tu wallet Stellar (Freighter, Albedo, etc.)', 'Conecta tu billetera a la Testnet oficial de Stellar para consultar saldos y autorizar pagos.'],
               ['Contrata y firma la transacción P2P', 'Confirma el monto con la comisión fija de 0.00001 XLM y obtén tu hash de verificación on-chain.']
             ].map(([t, d], i) => (
-              <li key={t} className="card p-6 flex gap-4 items-start border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#3965FA]/20 border border-[#3965FA]/40 font-mono text-sm font-bold text-[#3965FA]">{i + 1}</span>
+              <li key={t} className="card p-6 flex gap-4 items-start border border-white/15 bg-[#1B1B39]/90 backdrop-blur-xl">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#3965FA]/20 border border-[#3965FA]/40 font-mono text-base font-bold text-[#3965FA] shadow-md">{i + 1}</span>
                 <div>
                   <p className="text-base font-bold text-white">{t}</p>
                   <p className="mt-1 text-xs text-[#99B7FC]/80 leading-relaxed">{d}</p>
@@ -191,9 +215,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sección Pitch de Stellar en el MVP */}
+      {/* Sección Pitch de Stellar en el MVP con Ilustración de Red */}
       <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="card p-8 md:p-12 border-[#3965FA]/40 bg-[#1B1B39]/90 shadow-2xl backdrop-blur-2xl">
+        <div className="card p-8 md:p-12 border-[#3965FA]/40 bg-[#1B1B39]/90 shadow-2xl backdrop-blur-2xl space-y-8">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#3965FA]/20 border border-[#3965FA]/40 px-3 py-1 font-mono text-xs font-semibold text-[#3965FA]">
@@ -205,7 +229,12 @@ export default function Home() {
             <span className="font-mono text-xs text-[#99B7FC]">Testnet & Mainnet Ready</span>
           </div>
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Diagrama Ilustrativo de la Red Stellar */}
+          <div className="rounded-2xl border border-white/10 bg-[#1B1B39] p-6 shadow-inner">
+            <StellarNetworkIllustration className="w-full h-auto max-h-44" />
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]">
               <span className="font-mono text-2xl font-extrabold text-[#3965FA]">01</span>
               <h3 className="font-bold text-white">Stellar Wallets Kit</h3>
@@ -232,12 +261,12 @@ export default function Home() {
 
       {/* Doble entrada */}
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 md:grid-cols-2">
-        <Link href="/register?role=client" className="card-hover p-8 space-y-4 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
-          <div className="h-10 w-10 rounded-xl bg-[#3965FA]/20 border border-[#3965FA]/40 flex items-center justify-center text-[#3965FA]">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <Link href="/register?role=client" className="card-hover p-8 space-y-4 border border-white/15 bg-[#1B1B39]/90 backdrop-blur-xl">
+          <div className="h-12 w-12 rounded-2xl bg-[#3965FA]/20 border border-[#3965FA]/40 flex items-center justify-center text-[#3965FA] shadow-lg">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
           </div>
           <div>
-            <h3 className="font-display text-2xl font-bold text-white">Quiero contratar</h3>
+            <h3 className="font-display text-2xl font-extrabold text-white">Quiero contratar</h3>
             <p className="mt-1 text-sm text-[#99B7FC]/80 leading-relaxed">Explora talento verificado y contrata servicios con pagos en XLM.</p>
           </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3965FA] group-hover:underline">
@@ -245,12 +274,12 @@ export default function Home() {
           </span>
         </Link>
 
-        <Link href="/register?role=freelancer" className="card-hover p-8 space-y-4 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
-          <div className="h-10 w-10 rounded-xl bg-[#8CC63E]/20 border border-[#8CC63E]/40 flex items-center justify-center text-[#8CC63E]">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <Link href="/register?role=freelancer" className="card-hover p-8 space-y-4 border border-white/15 bg-[#1B1B39]/90 backdrop-blur-xl">
+          <div className="h-12 w-12 rounded-2xl bg-[#8CC63E]/20 border border-[#8CC63E]/40 flex items-center justify-center text-[#8CC63E] shadow-lg">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           </div>
           <div>
-            <h3 className="font-display text-2xl font-bold text-white">Quiero ofrecer mis servicios</h3>
+            <h3 className="font-display text-2xl font-extrabold text-white">Quiero ofrecer mis servicios</h3>
             <p className="mt-1 text-sm text-[#99B7FC]/80 leading-relaxed">Publica tu perfil profesional y recibe pagos directo a tu wallet.</p>
           </div>
           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8CC63E] group-hover:underline">

@@ -9,6 +9,7 @@ import ProjectCard from '@/components/ProjectCard';
 import { useApp } from '@/lib/AppContext';
 import RequireAuth from '@/components/RequireAuth';
 import { useXlmPrice } from '@/lib/useXlmPrice';
+import { EmptySearchIllustration } from '@/components/CategoryIllustrations';
 
 function Market() {
   const sp = useSearchParams();
@@ -19,7 +20,7 @@ function Market() {
   const [max, setMax] = useState(100);
   const [onlyAvail, setOnlyAvail] = useState(false);
   const { user } = useApp();
-  const { convertXlmToUsd } = useXlmPrice();
+  const { rate, convertXlmToUsd } = useXlmPrice();
   const prefsKey = user?.role === 'client' && Array.isArray(user.prefs) ? user.prefs.join(',') : '';
   const [forYou, setForYou] = useState(true);
   
@@ -42,21 +43,33 @@ function Market() {
 
   return (
     <div className="space-y-8">
-      {/* Dashboard Header & Tabs */}
-      <div className="card p-6 md:p-8 border border-white/15 bg-[#1B1B39]/90 shadow-2xl backdrop-blur-2xl">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#3965FA] animate-pulse" />
-              <span className="font-mono text-xs font-semibold uppercase text-[#99B7FC] tracking-wider">Dashboard Freelance · Red Stellar</span>
+      {/* Dashboard Header & Banner Visual */}
+      <div className="card p-6 md:p-8 border border-white/15 bg-[#1B1B39]/90 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+        {/* Visual Glow Background Decorative Elements */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#3965FA]/20 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/3 -bottom-20 h-48 w-48 rounded-full bg-[#8CC63E]/10 blur-2xl" />
+
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3965FA]/40 bg-[#3965FA]/15 px-3 py-1 font-mono text-xs font-semibold text-[#99B7FC]">
+                <span className="h-2 w-2 rounded-full bg-[#8CC63E] animate-pulse" />
+                Red Stellar Testnet
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs text-[#99B7FC]">
+                Fee: 0.00001 XLM
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs text-[#99B7FC]">
+                1 XLM = ${rate.toFixed(3)} USD
+              </span>
             </div>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white md:text-4xl">Marketplace Profesional</h1>
-            <p className="mt-1 text-sm text-[#99B7FC]/80 max-w-xl leading-relaxed">
+            <h1 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">Marketplace Profesional</h1>
+            <p className="text-sm text-[#99B7FC]/80 max-w-xl leading-relaxed">
               Explora talento verificado y solicitudes de proyectos con contratos y liquidación instantánea en XLM.
             </p>
           </div>
 
-          <div className="flex rounded-2xl border border-white/15 bg-[#1B1B39] p-1.5 backdrop-blur-xl shadow-inner">
+          <div className="flex rounded-2xl border border-white/15 bg-[#1B1B39] p-1.5 backdrop-blur-xl shadow-inner shrink-0">
             <button
               onClick={() => setTab('freelancers')}
               className={`flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-200 ${tab === 'freelancers' ? 'bg-[#3965FA] text-white shadow-lg shadow-[#3965FA]/30' : 'text-[#99B7FC] hover:text-white'}`}
@@ -185,9 +198,18 @@ function Market() {
               {loading ? (
                 <div className="card p-12 text-center text-[#99B7FC] font-medium">Cargando perfiles profesionales…</div>
               ) : freelancerList.length === 0 ? (
-                <div className="card p-12 text-center text-[#99B7FC] space-y-2">
-                  <p className="text-base font-bold text-white">No se encontraron freelancers con esos filtros.</p>
-                  <p className="text-xs">Intenta ajustar los filtros de categoría o rango de precios.</p>
+                <div className="card p-12 text-center text-[#99B7FC] space-y-4">
+                  <EmptySearchIllustration />
+                  <div>
+                    <p className="text-base font-bold text-white">No se encontraron freelancers con los filtros aplicados.</p>
+                    <p className="text-xs text-[#99B7FC]/70 mt-1">Prueba a limpiar la búsqueda o cambiar la categoría seleccionada.</p>
+                  </div>
+                  <button
+                    onClick={() => { setCategory('Todas'); setQ(''); setMin(0); setMax(100); setOnlyAvail(false); }}
+                    className="btn text-xs py-2 px-5 font-bold"
+                  >
+                    Restablecer Filtros
+                  </button>
                 </div>
               ) : (
                 <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -208,8 +230,18 @@ function Market() {
               {loading ? (
                 <div className="card p-12 text-center text-[#99B7FC] font-medium">Cargando ofertas de trabajo…</div>
               ) : projectList.length === 0 ? (
-                <div className="card p-12 text-center text-[#99B7FC] space-y-2">
-                  <p className="text-base font-bold text-white">No hay ofertas de proyectos abiertas con esos filtros.</p>
+                <div className="card p-12 text-center text-[#99B7FC] space-y-4">
+                  <EmptySearchIllustration />
+                  <div>
+                    <p className="text-base font-bold text-white">No hay ofertas de proyectos abiertas con esos filtros.</p>
+                    <p className="text-xs text-[#99B7FC]/70 mt-1">Prueba a limpiar los criterios de búsqueda.</p>
+                  </div>
+                  <button
+                    onClick={() => { setCategory('Todas'); setQ(''); }}
+                    className="btn text-xs py-2 px-5 font-bold"
+                  >
+                    Restablecer Filtros
+                  </button>
                 </div>
               ) : (
                 <div className="grid gap-5 sm:grid-cols-2">
