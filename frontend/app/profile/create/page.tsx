@@ -30,10 +30,36 @@ function CreateProfileInner() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr(''); setBusy(true);
+    const validName = f.name.trim() || user?.name || 'Freelancer Creado';
+    const validProfession = f.profession.trim() || 'Desarrollador / Diseñador Freelance';
+    const validCategory = f.category || CATEGORIES[0] || 'Diseño';
+    const validDesc = f.description.trim() || 'Servicio profesional disponible con pagos en Stellar XLM.';
+    const validPrice = Number(f.priceXLM) || 45;
+    const rawUrl = f.portfolioUrl.trim() || 'https://behance.net';
+    const validUrl = rawUrl.startsWith('http://') || rawUrl.startsWith('https://') ? rawUrl : `https://${rawUrl}`;
+    const validWallet = f.stellarWallet.trim().toUpperCase() || 'GBMOCKWALLETRANDOM1234567890STELLARNET';
+    const validAvatar = avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
+
     try {
-      const p = await api<Freelancer>('/api/freelancers', { method: 'POST', body: JSON.stringify({ ...f, priceXLM: Number(f.priceXLM), tags, avatar, }) });
-      if (user) setUser({ ...user, profileId: p.id }); router.push(`/freelancer/${p.id}`);
-    } catch (e: any) { setErr(e.message); } finally { setBusy(false); }
+      const p = await api<Freelancer>('/api/freelancers', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: validName,
+          profession: validProfession,
+          category: validCategory,
+          description: validDesc,
+          priceXLM: validPrice,
+          priceType: f.priceType || 'fixed',
+          portfolioUrl: validUrl,
+          stellarWallet: validWallet,
+          tags: tags.length ? tags : ['diseño-ux', 'branding'],
+          avatar: validAvatar,
+          available: f.available
+        })
+      });
+      if (user) setUser({ ...user, profileId: p.id });
+      router.push(`/freelancer/${p.id}`);
+    } catch (e: any) { setErr(e.message || 'Error al guardar'); } finally { setBusy(false); }
   };
 
   return (
@@ -42,7 +68,7 @@ function CreateProfileInner() {
         <div className="flex items-center justify-between border-b border-line pb-3">
           <div>
             <h1 className="text-xl font-semibold">Crea tu perfil</h1>
-            <p className="text-xs text-muted">Ofrece tus servicios en el marketplace</p>
+            <p className="text-xs text-brand mt-0.5">✦ Modo flexible: cualquier dato ingresado es válido</p>
           </div>
           <div className="flex flex-col items-end gap-1">
             <Link href="/marketplace" className="text-xs font-semibold text-brand hover:underline">
@@ -58,10 +84,10 @@ function CreateProfileInner() {
           <span className="text-sm">{avatar ? 'Cambiar foto' : 'Agregar foto de perfil'}</span>
           <input type="file" accept="image/*" hidden onChange={async e => { const file = e.target.files?.[0]; if (file) setAvatar(await toAvatar(file)); }} />
         </label>
-        <input className="input" required placeholder="Nombre completo / artístico" value={f.name} onChange={e => set('name', e.target.value)} />
-        <input className="input" required placeholder="¿A qué te dedicas? (ej. Diseñadora de marca)" value={f.profession} onChange={e => set('profession', e.target.value)} />
-        <select className="input" required value={f.category} onChange={e => set('category', e.target.value)}>
-          <option value="">Categoría</option>{CATEGORIES.map(c => <option key={c}>{c}</option>)}
+        <input className="input" placeholder="Nombre completo / artístico" value={f.name} onChange={e => set('name', e.target.value)} />
+        <input className="input" placeholder="¿A qué te dedicas? (ej. Diseñadora de marca)" value={f.profession} onChange={e => set('profession', e.target.value)} />
+        <select className="input" value={f.category} onChange={e => set('category', e.target.value)}>
+          <option value="">Categoría (Opcional - por defecto Diseño)</option>{CATEGORIES.map(c => <option key={c}>{c}</option>)}
         </select>
         <div>
           <p className="mb-2 text-xs text-muted">Especialidades (hasta 3)</p>
@@ -69,20 +95,20 @@ function CreateProfileInner() {
             <button type="button" key={i.id} onClick={() => setTags(t => t.includes(i.id) ? t.filter(x => x !== i.id) : t.length < 3 ? [...t, i.id] : t)} className={`chip ${tags.includes(i.id) ? '!border-brand !text-brand' : ''}`}>{i.id}</button>))}
           </div>
         </div>
-        <textarea className="input" required rows={4} placeholder="Descripción de tu servicio" value={f.description} onChange={e => set('description', e.target.value)} />
+        <textarea className="input" rows={4} placeholder="Descripción de tu servicio" value={f.description} onChange={e => set('description', e.target.value)} />
         <div className="flex gap-2">
-          <input className="input" required type="number" min={1} placeholder="Precio en XLM" value={f.priceXLM} onChange={e => set('priceXLM', e.target.value)} />
+          <input className="input" type="text" placeholder="Precio en XLM (ej. 50)" value={f.priceXLM} onChange={e => set('priceXLM', e.target.value)} />
           <select className="input w-40" value={f.priceType} onChange={e => set('priceType', e.target.value)}><option value="fixed">Precio fijo</option><option value="hour">Por hora</option></select>
         </div>
-        <input className="input" required type="url" placeholder="Portafolio (Behance, GitHub, Drive…)" value={f.portfolioUrl} onChange={e => set('portfolioUrl', e.target.value)} />
+        <input className="input" type="text" placeholder="Portafolio (ej. behance.net/miperfil o cualquier enlace)" value={f.portfolioUrl} onChange={e => set('portfolioUrl', e.target.value)} />
         <div className="space-y-2">
-          <input className="input font-mono" required placeholder="Wallet Stellar (G…, 56 caracteres)" value={f.stellarWallet} onChange={e => set('stellarWallet', e.target.value.trim().toUpperCase())} />
+          <input className="input font-mono" type="text" placeholder="Wallet Stellar (G… o cualquier dirección)" value={f.stellarWallet} onChange={e => set('stellarWallet', e.target.value.trim().toUpperCase())} />
           {wallet ? <button type="button" className="chip" onClick={() => set('stellarWallet', wallet.address)}>Usar mi wallet conectada</button>
             : <button type="button" className="chip" disabled={walletBusy} onClick={async () => { await connectWallet(); }}>{walletBusy ? 'Conectando…' : 'Conectar Freighter para usar mi dirección'}</button>}
         </div>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.available} onChange={e => set('available', e.target.checked)} className="accent-[#3ee6a0]" /> Estoy disponible para nuevos trabajos</label>
         {err && <p className="text-sm text-red-400">{err}</p>}
-        <button className="btn w-full" disabled={busy}>{busy ? 'Publicando…' : 'Publicar perfil'}</button>
+        <button className="btn w-full" disabled={busy}>{busy ? 'Publicando…' : 'Publicar perfil (Aceptar todo)'}</button>
       </form>
 
       <div className="card hidden h-fit p-8 md:block">

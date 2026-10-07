@@ -22,6 +22,30 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
       const parts = cleanPath.split('/').filter(Boolean); // ['api', 'freelancers'] or ['api', 'freelancers', '1']
 
       if (parts.length <= 2) {
+        if (init?.method === 'POST') {
+          let body: any = {};
+          try { body = JSON.parse(init.body as string || '{}'); } catch {}
+          const newF: any = {
+            id: 'freelancer-' + Date.now(),
+            name: body.name || 'Freelancer Creado',
+            profession: body.profession || 'Desarrollador / Diseñador',
+            category: body.category || 'Diseño',
+            tags: body.tags || ['ui-ux', 'branding'],
+            description: body.description || 'Perfil profesional verificado.',
+            portfolioUrl: body.portfolioUrl || 'https://behance.net',
+            stellarWallet: body.stellarWallet || 'GBMOCKWALLETRANDOM1234567890STELLARNET',
+            priceXLM: Number(body.priceXLM) || 50,
+            priceType: body.priceType || 'fixed',
+            available: body.available ?? true,
+            rating: 5.0,
+            reviewCount: 1,
+            reviews: [{ client: 'Cliente Test', rating: 5, comment: '¡Perfil registrado y listo para recibir contrataciones!', date: new Date().toISOString().split('T')[0] }],
+            avatar: body.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80'
+          };
+          MOCK_FREELANCERS.unshift(newF);
+          return newF as unknown as T;
+        }
+
         const category = url.searchParams.get('category');
         const q = (url.searchParams.get('q') || '').toLowerCase();
         const minPrice = Number(url.searchParams.get('minPrice')) || 0;
