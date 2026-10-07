@@ -20,47 +20,47 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @layer components {
-  /* Liquid Glass Panels */
-  .card {
-    background: rgba(32, 32, 32, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(233, 235, 255, 0.12);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
+  /* Liquid Glass Panels - Deep Navy & Purposium Blue Liquid Glassmorphism */
+  .card, .liquid-glass {
+    background: linear-gradient(135deg, rgba(57, 101, 250, 0.08) 0%, rgba(27, 27, 57, 0.9) 100%), rgba(27, 27, 57, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+    border-radius: 1.25rem;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   .card-hover {
-    background: rgba(32, 32, 32, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(233, 235, 255, 0.12);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(57, 101, 250, 0.08) 0%, rgba(27, 27, 57, 0.9) 100%), rgba(27, 27, 57, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+    border-radius: 1.25rem;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .card-hover:hover {
-    background: rgba(32, 32, 32, 0.85);
-    border-color: rgba(57, 101, 250, 0.4);
-    box-shadow: 0 12px 40px 0 rgba(57, 101, 250, 0.2), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(57, 101, 250, 0.18) 0%, rgba(27, 27, 57, 0.95) 100%), rgba(27, 27, 57, 0.9) !important;
+    border-color: rgba(57, 101, 250, 0.5);
+    box-shadow: 0 16px 48px 0 rgba(57, 101, 250, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#3965FA] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#3965FA]/25 transition-all duration-200 hover:bg-[#2A52E8] hover:shadow-[#3965FA]/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#3965FA] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#3965FA]/25 transition-all duration-200 hover:bg-[#2A52E8] hover:shadow-[#3965FA]/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
   }
   
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-2.5 text-sm font-medium text-[#E9EBFF] transition-all duration-200 hover:border-[#3965FA]/50 hover:bg-[#3965FA]/10 hover:text-white active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 backdrop-blur-md px-4 py-2.5 text-sm font-semibold text-[#E9EBFF] transition-all duration-200 hover:border-[#3965FA]/50 hover:bg-[#3965FA]/10 hover:text-white active:scale-[0.98];
   }
   
   .input {
-    @apply w-full rounded-xl border border-white/10 bg-[#202020]/80 backdrop-blur-md px-4 py-3 text-sm text-white outline-none placeholder:text-[#99B7FC]/60 transition-all focus:border-[#3965FA] focus:ring-2 focus:ring-[#3965FA]/20;
+    @apply w-full rounded-xl border border-white/15 bg-[#1B1B39]/90 backdrop-blur-md px-4 py-3 text-sm text-white outline-none placeholder:text-[#99B7FC]/60 transition-all focus:border-[#3965FA] focus:ring-2 focus:ring-[#3965FA]/25;
   }
   
   .chip {
-    @apply rounded-full border border-white/10 bg-white/5 backdrop-blur-md px-3.5 py-1.5 font-mono text-xs text-[#99B7FC] transition-all hover:border-[#3965FA] hover:bg-[#3965FA]/10 hover:text-white;
+    @apply rounded-full border border-white/15 bg-white/5 backdrop-blur-md px-3.5 py-1.5 font-mono text-xs font-medium text-[#99B7FC] transition-all hover:border-[#3965FA] hover:bg-[#3965FA]/15 hover:text-white;
   }
 }
 

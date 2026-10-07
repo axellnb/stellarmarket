@@ -12,7 +12,7 @@ interface LiquidGlassWrapperProps {
 export default function LiquidGlassWrapper({
   children,
   className = '',
-  glassSelector = '.liquid-glass',
+  glassSelector = '.liquid-glass-webgl',
   defaults = {
     cornerRadius: 24,
     blurAmount: 0.2,
@@ -37,7 +37,6 @@ export default function LiquidGlassWrapper({
         const elements = root.querySelectorAll<HTMLElement>(glassSelector);
         if (!elements || elements.length === 0) return;
 
-        // Cleanup previous instance if any
         if (instanceRef.current) {
           instanceRef.current.destroy();
           instanceRef.current = null;
@@ -59,7 +58,6 @@ export default function LiquidGlassWrapper({
       }
     };
 
-    // Delay slightly to let initial DOM paint complete
     const timer = setTimeout(initGlass, 150);
 
     return () => {

@@ -19,7 +19,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     if (path.startsWith('/api/freelancers')) {
       const url = new URL(`http://localhost${path}`);
       const cleanPath = url.pathname.replace(/\/$/, '');
-      const parts = cleanPath.split('/').filter(Boolean); // ['api', 'freelancers'] or ['api', 'freelancers', '1']
+      const parts = cleanPath.split('/').filter(Boolean);
 
       if (parts.length <= 2) {
         if (init?.method === 'POST') {
@@ -47,13 +47,19 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
         }
 
         const category = url.searchParams.get('category');
-        const q = (url.searchParams.get('q') || '').toLowerCase();
+        const rawQ = (url.searchParams.get('q') || '').trim().toLowerCase();
         const minPrice = Number(url.searchParams.get('minPrice')) || 0;
         const maxPrice = Number(url.searchParams.get('maxPrice')) || 9999;
         
         let list = [...MOCK_FREELANCERS];
         if (category && category !== 'Todas') list = list.filter(f => f.category === category);
-        if (q) list = list.filter(f => [f.name, f.profession, f.category, f.description, ...f.tags].some(s => s.toLowerCase().includes(q)));
+        if (rawQ) {
+          const words = rawQ.split(/\s+/).filter(w => w.length > 1);
+          list = list.filter(f => {
+            const haystack = [f.name, f.profession, f.category, f.description, ...f.tags].join(' ').toLowerCase();
+            return words.length > 0 ? words.some(w => haystack.includes(w)) : haystack.includes(rawQ);
+          });
+        }
         list = list.filter(f => f.priceXLM >= minPrice && f.priceXLM <= maxPrice);
         return list as unknown as T;
       }
@@ -83,11 +89,17 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 
       if (parts.length <= 2) {
         const category = url.searchParams.get('category');
-        const q = (url.searchParams.get('q') || '').toLowerCase();
+        const rawQ = (url.searchParams.get('q') || '').trim().toLowerCase();
         
         let list = [...MOCK_PROJECTS];
         if (category && category !== 'Todas') list = list.filter(p => p.category === category);
-        if (q) list = list.filter(p => [p.title, p.clientName, p.category, p.description, ...p.tags].some(s => s.toLowerCase().includes(q)));
+        if (rawQ) {
+          const words = rawQ.split(/\s+/).filter(w => w.length > 1);
+          list = list.filter(p => {
+            const haystack = [p.title, p.clientName, p.category, p.description, ...p.tags].join(' ').toLowerCase();
+            return words.length > 0 ? words.some(w => haystack.includes(w)) : haystack.includes(rawQ);
+          });
+        }
         return list as unknown as T;
       }
 
