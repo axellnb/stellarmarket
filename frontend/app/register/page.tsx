@@ -53,6 +53,17 @@ function Access() {
     router.push(next);
   };
 
+  const instantRoleEnter = (r: Role) => {
+    setBusy(true);
+    setErr('');
+    const cleanEmail = r === 'client' ? 'cliente@stellarwork.app' : 'freelancer@stellarwork.app';
+    const derivedName = r === 'client' ? 'Cliente Demo' : 'Freelancer Demo';
+    const u: User = { name: derivedName, email: cleanEmail, role: r, prefs: [] };
+    const sessionToken = 'demo-token-' + Date.now();
+    setWarp(true);
+    setTimeout(() => { setUser({ ...u, token: sessionToken }); router.push(dest(u)); }, 500);
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); if (!role) return;
     setErr(''); setBusy(true);
@@ -65,16 +76,11 @@ function Access() {
     } catch {
       const cleanEmail = email.trim().toLowerCase() || (role === 'client' ? 'cliente@stellarwork.app' : 'freelancer@stellarwork.app');
       const derivedName = name.trim() || cleanEmail.split('@')[0] || (role === 'client' ? 'Cliente Demo' : 'Freelancer Demo');
-      u = {
-        name: derivedName,
-        email: cleanEmail,
-        role,
-        prefs: []
-      };
-      sessionToken = 'test-token-' + Date.now();
+      u = { name: derivedName, email: cleanEmail, role, prefs: [] };
+      sessionToken = 'demo-token-' + Date.now();
     }
     setWarp(true);
-    setTimeout(() => { setUser({ ...u!, token: sessionToken }); router.push(dest(u!)); }, 800);
+    setTimeout(() => { setUser({ ...u!, token: sessionToken }); router.push(dest(u!)); }, 500);
   };
 
   const focus: Side = role || hover;
@@ -108,12 +114,18 @@ function Access() {
                   <span className="relative font-display text-4xl font-extrabold tracking-tight text-white transition-transform duration-500 group-hover:-translate-y-1 md:text-6xl">{ROLES[r].title}</span>
                   <span className="relative mt-2 text-lg font-semibold" style={{ color: ROLES[r].accent }}>{ROLES[r].line}</span>
                   <span className="relative mt-3 max-w-sm text-sm text-[#99B7FC]/80 transition-all duration-500 md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-visible:translate-y-0 md:group-focus-visible:opacity-100">{ROLES[r].detail}</span>
+                  
+                  <div className="relative mt-6">
+                    <span className="inline-flex items-center gap-2 rounded-xl bg-[#3965FA] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#3965FA]/30 group-hover:scale-105 transition-all">
+                      Ingresar como {r === 'client' ? 'Cliente' : 'Freelancer'} →
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
           <div className="relative z-10 flex flex-col items-center pb-8 gap-3">
-            <p className="text-sm text-[#99B7FC]/70">¿Ya tienes cuenta? Elige tu rol y pulsa «Iniciar sesión».</p>
+            <p className="text-sm text-[#99B7FC]/70">¿Prefieres explorar primero?</p>
             <button type="button" onClick={enterAsGuest} className="btn-ghost flex items-center gap-2 rounded-full border border-[#3965FA]/40 bg-[#1B1B39]/80 px-6 py-2.5 text-sm font-medium text-[#99B7FC] hover:bg-[#3965FA] hover:text-white transition backdrop-blur-md">
               <svg className="w-4 h-4 text-[#3965FA] group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -125,25 +137,42 @@ function Access() {
         </div>
       ) : (
         <div className={`relative z-10 grid min-h-screen place-items-center px-4 transition-opacity duration-500 ${warp ? 'opacity-0' : 'opacity-100'}`}>
-          <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-3xl border border-white/15 bg-[#1B1B39]/80 p-8 shadow-2xl backdrop-blur-2xl" style={{ boxShadow: `0 0 80px -20px ${A}44` }}>
+          <form onSubmit={submit} className="w-full max-w-md space-y-4 rounded-3xl border border-white/15 bg-[#1B1B39]/90 p-8 shadow-2xl backdrop-blur-2xl" style={{ boxShadow: `0 0 80px -20px ${A}44` }}>
             <div>
               <p className="font-display text-2xl font-bold text-white">{ROLES[role].title}</p>
               <button type="button" onClick={() => { setRole(null); setErr(''); }} className="mt-1 text-xs text-[#99B7FC] hover:underline">Cambiar de rol</button>
             </div>
+
+            <button
+              type="button"
+              onClick={() => instantRoleEnter(role)}
+              className="w-full py-3.5 rounded-xl font-bold text-sm bg-[#3965FA] text-white shadow-lg shadow-[#3965FA]/30 hover:bg-[#2A52E8] transition-all flex items-center justify-center gap-2"
+              disabled={busy}
+            >
+              {busy ? 'Ingresando…' : `Acceso Rápido 1-Clic (${ROLES[role].title})`}
+            </button>
+
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-white/10"></div>
+              <span className="flex-shrink mx-3 text-xs text-[#99B7FC]/60">o personaliza tu cuenta</span>
+              <div className="flex-grow border-t border-white/10"></div>
+            </div>
+
             <div className="flex gap-2" role="tablist">
               {(['register', 'login'] as const).map(m => (
                 <button type="button" role="tab" aria-selected={mode === m} key={m} onClick={() => { setMode(m); setErr(''); }}
                   className={`chip ${mode === m ? '!border-[#3965FA] !bg-[#3965FA]/20 !text-white' : ''}`}>{m === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}</button>
               ))}
             </div>
+
             {mode === 'register' && <input className="input" autoFocus placeholder="Nombre (ej. María González)" value={name} onChange={e => setName(e.target.value)} />}
             <input className="input" type="text" autoFocus={mode === 'login'} placeholder="Correo o usuario (ej. maria@stellarwork.app)" value={email} onChange={e => setEmail(e.target.value)} />
-            <input className="input" type="password" placeholder="Contraseña (opcional para prueba)" value={password} onChange={e => setPassword(e.target.value)} />
+            <input className="input" type="password" placeholder="Contraseña (opcional)" value={password} onChange={e => setPassword(e.target.value)} />
             {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
-            <button className="btn w-full py-3.5 text-sm font-bold shadow-lg shadow-[#3965FA]/30" style={{ background: A, color: '#FFFFFF' }} disabled={busy}>
-              {busy ? 'Entrando…' : mode === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}
+            <button className="btn w-full py-3 text-sm font-bold shadow-lg" style={{ background: A, color: '#FFFFFF' }} disabled={busy}>
+              {busy ? 'Entrando…' : mode === 'register' ? 'Confirmar Registro' : 'Iniciar sesión'}
             </button>
-            <div className="pt-3 border-t border-white/10 text-center">
+            <div className="pt-2 border-t border-white/10 text-center">
               <button type="button" onClick={enterAsGuest} className="text-xs font-medium text-[#99B7FC] hover:underline">
                 Entrar como invitado (sin crear perfil)
               </button>
