@@ -4,7 +4,7 @@
 - **Frontend:** Next.js 14, React 18, Tailwind CSS y TypeScript
 - **Backend:** Node.js, Express y TypeScript
 - **Blockchain:** Stellar SDK, Freighter API y Horizon
-- **Requisitos:** Node.js 18 o superior y la extensión [Freighter](https://freighter.app)
+-
   
 ## Estructura
 ```
