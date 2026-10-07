@@ -3,25 +3,31 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/lib/AppContext';
-import LiquidGlassWrapper from '@/components/LiquidGlassWrapper';
+import { useXlmPrice, convertXlmToUsd } from '@/lib/useXlmPrice';
 
-type Tile = { t: string; c: string; p: string };
+type Tile = { t: string; c: string; p: number; h?: boolean };
 const COLS: Tile[][] = [
-  [{ t: 'Diseño de Marca & UX', c: 'Diseño', p: '45 XLM' }, { t: 'Frontend en Next.js', c: 'Desarrollo', p: '15 XLM / h' }, { t: '3D Motion Reel', c: 'Video', p: '80 XLM' }],
-  [{ t: 'Copywriting Web3', c: 'Escritura', p: '30 XLM' }, { t: 'Campaña en Meta Ads', c: 'Marketing', p: '60 XLM' }, { t: 'Smart Contract Soroban', c: 'Desarrollo', p: '25 XLM / h' }],
-  [{ t: 'Integración Stellar SDK', c: 'Desarrollo', p: '20 XLM / h' }, { t: 'Estrategia SEO Content', c: 'Marketing', p: '40 XLM' }, { t: 'Ilustración Vectorial', c: 'Diseño', p: '35 XLM' }]
+  [{ t: 'Diseño de Marca & UX', c: 'Diseño', p: 45 }, { t: 'Frontend en Next.js', c: 'Desarrollo', p: 15, h: true }, { t: '3D Motion Reel', c: 'Video', p: 80 }],
+  [{ t: 'Copywriting Web3', c: 'Escritura', p: 30 }, { t: 'Campaña en Meta Ads', c: 'Marketing', p: 60 }, { t: 'Smart Contract Soroban', c: 'Desarrollo', p: 25, h: true }],
+  [{ t: 'Integración Stellar SDK', c: 'Desarrollo', p: 20, h: true }, { t: 'Estrategia SEO Content', c: 'Marketing', p: 40 }, { t: 'Ilustración Vectorial', c: 'Diseño', p: 35 }]
 ];
 
-const TileCard = ({ x }: { x: Tile }) => (
-  <div className="w-full overflow-hidden rounded-2xl border border-white/15 bg-[#1B1B39]/80 backdrop-blur-md p-4 shadow-xl hover:border-[#3965FA]/40 transition-all">
-    <div className="flex items-center gap-2">
-      <span className="h-2 w-2 rounded-full bg-[#3965FA]" />
-      <span className="font-mono text-[11px] font-semibold text-[#99B7FC] uppercase">{x.c}</span>
+const TileCard = ({ x }: { x: Tile }) => {
+  const usd = convertXlmToUsd(x.p);
+  return (
+    <div className="w-full overflow-hidden rounded-2xl border border-white/15 bg-[#1B1B39]/90 backdrop-blur-md p-4 shadow-xl hover:border-[#3965FA]/40 transition-all">
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-[#3965FA]" />
+        <span className="font-mono text-[11px] font-semibold text-[#99B7FC] uppercase">{x.c}</span>
+      </div>
+      <p className="mt-2 font-bold text-white leading-snug">{x.t}</p>
+      <p className="mt-2 text-xs text-[#99B7FC]">
+        Desde <span className="font-mono font-bold text-[#3965FA]">{x.p} XLM{x.h ? ' / h' : ''}</span>{' '}
+        <span className="text-[11px] text-[#99B7FC]/80 font-mono">({usd}{x.h ? '/h' : ''})</span>
+      </p>
     </div>
-    <p className="mt-2 font-semibold text-white leading-snug">{x.t}</p>
-    <p className="mt-2 text-xs text-[#99B7FC]">Desde <span className="font-mono font-bold text-[#3965FA]">{x.p}</span></p>
-  </div>
-);
+  );
+};
 
 const CATS = [
   { n: 'Diseño & Marca', d: 'Logos, branding, UI/UX e ilustración', span: 'md:col-span-2 md:row-span-2' },
@@ -36,6 +42,7 @@ const POPULAR = ['Diseño de logo', 'Landing page', 'Edición de video', 'Artíc
 export default function Home() {
   const router = useRouter();
   const { user } = useApp();
+  const { rate } = useXlmPrice();
   const [q, setQ] = useState('');
 
   const search = (e: React.FormEvent) => {
@@ -44,7 +51,7 @@ export default function Home() {
   };
 
   return (
-    <LiquidGlassWrapper className="space-y-16">
+    <div className="space-y-16">
       {/* Portada Hero */}
       <section className="relative overflow-hidden pt-8 pb-12">
         <div className="pointer-events-none absolute -right-32 top-0 h-[600px] w-[600px] rounded-full bg-[#3965FA]/20 blur-[140px]" />
@@ -93,8 +100,8 @@ export default function Home() {
                 <dd className="font-mono text-base font-bold text-white mt-1">0.00001 XLM</dd>
               </div>
               <div>
-                <dt className="text-[#99B7FC]/70">Finalidad Block</dt>
-                <dd className="font-mono text-base font-bold text-[#3965FA] mt-1">~5 segundos</dd>
+                <dt className="text-[#99B7FC]/70">Cotización Ticker</dt>
+                <dd className="font-mono text-base font-bold text-[#3965FA] mt-1">${rate.toFixed(3)} USD</dd>
               </div>
               <div>
                 <dt className="text-[#99B7FC]/70">Custodia</dt>
@@ -113,8 +120,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="pop-in liquid-glass absolute -left-4 bottom-12 flex items-center gap-3.5 rounded-2xl border border-white/15 bg-[#1B1B39]/90 px-5 py-4 shadow-2xl backdrop-blur-2xl"
-                 data-config={JSON.stringify({ refraction: 0.7, blurAmount: 0.25, cornerRadius: 16 })}>
+            <div className="pop-in absolute -left-4 bottom-12 flex items-center gap-3.5 rounded-2xl border border-white/15 bg-[#1B1B39]/95 px-5 py-4 shadow-2xl backdrop-blur-2xl">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#3965FA] text-white shadow-lg shadow-[#3965FA]/30">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               </span>
@@ -145,8 +151,7 @@ export default function Home() {
             <Link
               key={c.n}
               href={`/marketplace?category=${encodeURIComponent(c.n)}`}
-              className={`card-hover liquid-glass group relative flex flex-col justify-end p-6 ${c.span}`}
-              data-config={JSON.stringify({ refraction: 0.65, blurAmount: 0.2, cornerRadius: 20 })}
+              className={`card-hover group relative flex flex-col justify-end p-6 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl ${c.span}`}
             >
               <div className="absolute top-4 right-4 h-8 w-8 rounded-xl border border-white/15 bg-white/5 flex items-center justify-center text-[#3965FA] group-hover:bg-[#3965FA] group-hover:text-white transition-all">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
@@ -174,7 +179,7 @@ export default function Home() {
               ['Conecta tu wallet Stellar (Freighter, Albedo, etc.)', 'Conecta tu billetera a la Testnet oficial de Stellar para consultar saldos y autorizar pagos.'],
               ['Contrata y firma la transacción P2P', 'Confirma el monto con la comisión fija de 0.00001 XLM y obtén tu hash de verificación on-chain.']
             ].map(([t, d], i) => (
-              <li key={t} className="card liquid-glass p-6 flex gap-4 items-start" data-config={JSON.stringify({ refraction: 0.5, blurAmount: 0.15, cornerRadius: 20 })}>
+              <li key={t} className="card p-6 flex gap-4 items-start border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#3965FA]/20 border border-[#3965FA]/40 font-mono text-sm font-bold text-[#3965FA]">{i + 1}</span>
                 <div>
                   <p className="text-base font-bold text-white">{t}</p>
@@ -188,8 +193,7 @@ export default function Home() {
 
       {/* Sección Pitch de Stellar en el MVP */}
       <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="card liquid-glass p-8 md:p-12 border-[#3965FA]/40 bg-[#1B1B39]/80 shadow-2xl backdrop-blur-2xl"
-             data-config={JSON.stringify({ refraction: 0.75, blurAmount: 0.25, cornerRadius: 24 })}>
+        <div className="card p-8 md:p-12 border-[#3965FA]/40 bg-[#1B1B39]/90 shadow-2xl backdrop-blur-2xl">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#3965FA]/20 border border-[#3965FA]/40 px-3 py-1 font-mono text-xs font-semibold text-[#3965FA]">
@@ -202,22 +206,22 @@ export default function Home() {
           </div>
 
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]/60">
+            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]">
               <span className="font-mono text-2xl font-extrabold text-[#3965FA]">01</span>
               <h3 className="font-bold text-white">Stellar Wallets Kit</h3>
               <p className="text-xs text-[#99B7FC]/80 leading-relaxed">Soporte multiconexión para Freighter, Albedo, xBull y Rabet sin custodiar claves privadas.</p>
             </div>
-            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]/60">
+            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]">
               <span className="font-mono text-2xl font-extrabold text-[#3965FA]">02</span>
               <h3 className="font-bold text-white">Pagos P2P en XLM</h3>
               <p className="text-xs text-[#99B7FC]/80 leading-relaxed">Envío directo de fondos a la clave pública del freelancer (`G...`) con comisión de 0.00001 XLM.</p>
             </div>
-            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]/60">
+            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]">
               <span className="font-mono text-2xl font-extrabold text-[#3965FA]">03</span>
               <h3 className="font-bold text-white">Friendbot Testnet</h3>
               <p className="text-xs text-[#99B7FC]/80 leading-relaxed">Integración con el Faucet oficial de Stellar para inyectar 10,000 XLM de prueba en 1 clic.</p>
             </div>
-            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]/60">
+            <div className="card p-5 space-y-2 border-white/10 bg-[#1B1B39]">
               <span className="font-mono text-2xl font-extrabold text-[#3965FA]">04</span>
               <h3 className="font-bold text-white">Verificación Horizon</h3>
               <p className="text-xs text-[#99B7FC]/80 leading-relaxed">Auditoría on-chain en el explorador `stellar.expert` con hashes de transacción indexados.</p>
@@ -228,7 +232,7 @@ export default function Home() {
 
       {/* Doble entrada */}
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 md:grid-cols-2">
-        <Link href="/register?role=client" className="card-hover liquid-glass p-8 space-y-4" data-config={JSON.stringify({ refraction: 0.6, blurAmount: 0.2, cornerRadius: 20 })}>
+        <Link href="/register?role=client" className="card-hover p-8 space-y-4 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
           <div className="h-10 w-10 rounded-xl bg-[#3965FA]/20 border border-[#3965FA]/40 flex items-center justify-center text-[#3965FA]">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
           </div>
@@ -241,7 +245,7 @@ export default function Home() {
           </span>
         </Link>
 
-        <Link href="/register?role=freelancer" className="card-hover liquid-glass p-8 space-y-4" data-config={JSON.stringify({ refraction: 0.6, blurAmount: 0.2, cornerRadius: 20 })}>
+        <Link href="/register?role=freelancer" className="card-hover p-8 space-y-4 border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
           <div className="h-10 w-10 rounded-xl bg-[#8CC63E]/20 border border-[#8CC63E]/40 flex items-center justify-center text-[#8CC63E]">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           </div>
@@ -258,6 +262,6 @@ export default function Home() {
       <footer className="border-t border-white/10 py-8 text-center text-xs text-[#99B7FC]/60 font-sans">
         StellarWork · Marketplace Profesional sobre la Red Stellar
       </footer>
-    </LiquidGlassWrapper>
+    </div>
   );
 }

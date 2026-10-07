@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '@/lib/AppContext';
 import { NETWORK, NETWORK_LABEL } from '@/lib/stellar';
+import { useXlmPrice } from '@/lib/useXlmPrice';
 
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 
@@ -19,6 +20,7 @@ function useOutside(close: () => void) {
 export default function Navbar() {
   const path = usePathname();
   const { ready, user, logout, wallet, walletBusy, walletError, connectWallet, disconnectWallet, refreshWallet, fundWallet, clearWalletError } = useApp();
+  const { rate, convertXlmToUsd } = useXlmPrice();
   const [menu, setMenu] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const menuRef = useOutside(() => setMenu(false));
@@ -29,9 +31,9 @@ export default function Navbar() {
   const acct = !user ? null : user.role === 'client' ? { href: '/preferences', label: 'Mis intereses' } : user.profileId ? { href: `/freelancer/${user.profileId}`, label: 'Mi perfil' } : { href: '/profile/create', label: 'Crear perfil' };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#1B1B39]/80 backdrop-blur-xl transition-all">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#1B1B39]/90 backdrop-blur-2xl transition-all">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <div className="flex items-center gap-10">
+        <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#3965FA] text-white shadow-lg shadow-[#3965FA]/30 group-hover:scale-105 transition-transform">
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -40,7 +42,15 @@ export default function Navbar() {
             </span>
             <span className="font-display text-xl font-bold tracking-tight text-white">Stellar<span className="text-[#3965FA]">Work</span></span>
           </Link>
-          <nav className="hidden items-center gap-7 text-sm font-medium text-[#99B7FC] md:flex">
+
+          {/* Live XLM to USD Ticker Badge */}
+          <div className="hidden sm:flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-mono backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-[#8CC63E] animate-pulse" />
+            <span className="text-white font-bold">1 XLM</span>
+            <span className="text-[#99B7FC]">= ${rate.toFixed(3)} USD</span>
+          </div>
+
+          <nav className="hidden items-center gap-6 text-sm font-medium text-[#99B7FC] md:flex">
             <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
             {user && !user.isGuest && acct && <Link href={acct.href} className="hover:text-white transition-colors">{acct.label}</Link>}
             <Link href="/#categorias" className="hover:text-white transition-colors">Categorías</Link>
@@ -71,7 +81,9 @@ export default function Navbar() {
             <div className="relative" ref={walletRef}>
               {wallet ? (
                 <button className="btn-ghost gap-2 font-mono text-xs" onClick={() => { setWalletOpen(o => !o); if (!walletOpen) refreshWallet(); }}>
-                  <span className={`h-2 w-2 rounded-full ${wallet.funded ? 'bg-emerald-400' : 'bg-amber-400'}`} />{wallet.balance.toFixed(2)} XLM
+                  <span className={`h-2 w-2 rounded-full ${wallet.funded ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                  <span>{wallet.balance.toFixed(2)} XLM</span>
+                  <span className="text-[#99B7FC] font-normal">({convertXlmToUsd(wallet.balance)})</span>
                 </button>
               ) : (
                 <button className="btn" disabled={walletBusy} onClick={async () => { if (!(await connectWallet())) setWalletOpen(true); }}>
@@ -79,14 +91,21 @@ export default function Navbar() {
                 </button>
               )}
               {walletOpen && (
-                <div className="card absolute right-0 mt-2 w-72 space-y-3 p-4 text-sm shadow-2xl z-50">
+                <div className="card absolute right-0 mt-2 w-80 space-y-3 p-5 text-sm shadow-2xl z-50 border-white/15 bg-[#1B1B39]/95 backdrop-blur-2xl">
                   {walletError && <p className="text-red-400 text-xs">{walletError}{walletError.includes('freighter.app') && <> <a className="underline" href="https://www.freighter.app" target="_blank" rel="noopener noreferrer">Abrir sitio</a></>}</p>}
                   {wallet && (<>
-                    <div className="flex items-center justify-between border-b border-white/10 pb-2"><p className="text-xs text-[#99B7FC]">Wallet conectada</p><span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[11px] text-[#99B7FC]">{NETWORK_LABEL}</span></div>
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                      <p className="text-xs text-[#99B7FC] font-semibold">Wallet conectada</p>
+                      <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[11px] text-[#99B7FC]">{NETWORK_LABEL}</span>
+                    </div>
                     <button className="font-mono text-xs hover:text-[#3965FA] text-left break-all text-white" title="Copiar dirección" onClick={() => navigator.clipboard?.writeText(wallet.address)}>{short(wallet.address)}</button>
-                    <p className="font-mono text-xs text-[#99B7FC]">Disponible: {wallet.spendable.toFixed(2)} XLM</p>
+                    <div className="space-y-1 font-mono text-xs bg-[#1B1B39] p-3 rounded-xl border border-white/10">
+                      <p className="text-[#99B7FC]/70">Saldo disponible</p>
+                      <p className="text-white font-bold text-sm">{wallet.spendable.toFixed(2)} XLM</p>
+                      <p className="text-[#3965FA] font-medium">{convertXlmToUsd(wallet.spendable)}</p>
+                    </div>
                     {!wallet.funded && <p className="text-xs text-amber-400">Esta cuenta aún no existe en {NETWORK_LABEL}. Requiere fondos.</p>}
-                    {!wallet.funded && NETWORK === 'TESTNET' && <button className="btn w-full text-xs py-2" disabled={walletBusy} onClick={fundWallet}>{walletBusy ? 'Fondeando…' : 'Fondear con friendbot'}</button>}
+                    {!wallet.funded && NETWORK === 'TESTNET' && <button className="btn w-full text-xs py-2.5 font-bold" disabled={walletBusy} onClick={fundWallet}>{walletBusy ? 'Fondeando…' : 'Fondear con friendbot'}</button>}
                     <button className="btn-ghost w-full text-xs py-2" onClick={() => { disconnectWallet(); setWalletOpen(false); }}>Desconectar</button>
                   </>)}
                 </div>
@@ -94,10 +113,10 @@ export default function Navbar() {
             </div>
 
             <div className="relative" ref={menuRef}>
-              <button className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-[#202020] font-mono text-sm font-bold text-[#3965FA] hover:border-[#3965FA]/50 transition-all shadow-md" onClick={() => setMenu(o => !o)} aria-label="Menú de cuenta">{(user?.name?.[0] || 'U').toUpperCase()}</button>
+              <button className="grid h-10 w-10 place-items-center rounded-xl border border-white/15 bg-[#1B1B39] font-mono text-sm font-bold text-[#3965FA] hover:border-[#3965FA]/50 transition-all shadow-md" onClick={() => setMenu(o => !o)} aria-label="Menú de cuenta">{(user?.name?.[0] || 'U').toUpperCase()}</button>
               {menu && (
-                <div className="card absolute right-0 mt-2 w-52 overflow-hidden p-1.5 shadow-2xl z-50">
-                  <div className="px-3 py-2.5 border-b border-white/10"><p className="truncate text-sm font-medium text-white">{user?.name || 'Usuario'}</p><p className="text-xs text-[#99B7FC]">{user?.role === 'client' ? 'Cliente' : 'Freelancer'}</p></div>
+                <div className="card absolute right-0 mt-2 w-52 overflow-hidden p-1.5 shadow-2xl z-50 border-white/15 bg-[#1B1B39]/95 backdrop-blur-2xl">
+                  <div className="px-3 py-2.5 border-b border-white/10"><p className="truncate text-sm font-bold text-white">{user?.name || 'Usuario'}</p><p className="text-xs text-[#99B7FC]">{user?.role === 'client' ? 'Cliente' : 'Freelancer'}</p></div>
                   <button onClick={async () => { setMenu(false); await logout(); }} className="block w-full rounded-lg mt-1 px-3 py-2 text-left text-xs font-semibold text-[#99B7FC] hover:bg-white/5 hover:text-red-400 transition-colors">Cerrar sesión</button>
                 </div>
               )}

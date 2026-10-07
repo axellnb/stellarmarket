@@ -8,7 +8,7 @@ import FreelancerCard from '@/components/FreelancerCard';
 import ProjectCard from '@/components/ProjectCard';
 import { useApp } from '@/lib/AppContext';
 import RequireAuth from '@/components/RequireAuth';
-import LiquidGlassWrapper from '@/components/LiquidGlassWrapper';
+import { useXlmPrice } from '@/lib/useXlmPrice';
 
 function Market() {
   const sp = useSearchParams();
@@ -19,6 +19,7 @@ function Market() {
   const [max, setMax] = useState(100);
   const [onlyAvail, setOnlyAvail] = useState(false);
   const { user } = useApp();
+  const { convertXlmToUsd } = useXlmPrice();
   const prefsKey = user?.role === 'client' && Array.isArray(user.prefs) ? user.prefs.join(',') : '';
   const [forYou, setForYou] = useState(true);
   
@@ -40,10 +41,9 @@ function Market() {
   }, [tab, category, min, max, q, onlyAvail, forYou, prefsKey]);
 
   return (
-    <LiquidGlassWrapper className="space-y-8">
+    <div className="space-y-8">
       {/* Dashboard Header & Tabs */}
-      <div className="card liquid-glass p-6 border-white/15 bg-[#1B1B39]/80 shadow-2xl backdrop-blur-2xl"
-           data-config={JSON.stringify({ refraction: 0.7, blurAmount: 0.2, cornerRadius: 24 })}>
+      <div className="card p-6 md:p-8 border border-white/15 bg-[#1B1B39]/90 shadow-2xl backdrop-blur-2xl">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -56,13 +56,13 @@ function Market() {
             </p>
           </div>
 
-          <div className="flex rounded-2xl border border-white/15 bg-[#1B1B39]/90 p-1.5 backdrop-blur-xl shadow-inner">
+          <div className="flex rounded-2xl border border-white/15 bg-[#1B1B39] p-1.5 backdrop-blur-xl shadow-inner">
             <button
               onClick={() => setTab('freelancers')}
               className={`flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-200 ${tab === 'freelancers' ? 'bg-[#3965FA] text-white shadow-lg shadow-[#3965FA]/30' : 'text-[#99B7FC] hover:text-white'}`}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Freelancers
             </button>
@@ -81,8 +81,7 @@ function Market() {
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         {/* Panel de Filtros */}
-        <aside className="card liquid-glass space-y-6 p-6 h-fit border-white/15 bg-[#1B1B39]/70 backdrop-blur-xl"
-               data-config={JSON.stringify({ refraction: 0.6, blurAmount: 0.15, cornerRadius: 20 })}>
+        <aside className="card space-y-6 p-6 h-fit border border-white/15 bg-[#1B1B39]/80 backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <h2 className="font-bold text-white text-base flex items-center gap-2">
               <svg className="w-4 h-4 text-[#3965FA]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,7 +92,7 @@ function Market() {
             {(category !== 'Todas' || q || min > 0 || max < 100 || onlyAvail) && (
               <button
                 onClick={() => { setCategory('Todas'); setQ(''); setMin(0); setMax(100); setOnlyAvail(false); }}
-                className="text-xs text-[#3965FA] hover:underline"
+                className="text-xs text-[#3965FA] hover:underline font-semibold"
               >
                 Limpiar
               </button>
@@ -127,7 +126,7 @@ function Market() {
                 <button
                   key={c}
                   onClick={() => setCategory(c)}
-                  className={`chip ${category === c ? '!border-[#3965FA] !bg-[#3965FA]/20 !text-white' : ''}`}
+                  className={`chip ${category === c ? '!border-[#3965FA] !bg-[#3965FA]/20 !text-white font-bold' : ''}`}
                 >
                   {c}
                 </button>
@@ -140,7 +139,10 @@ function Market() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="text-xs font-semibold text-[#99B7FC]">Tarifa Máxima</label>
-                <span className="font-mono text-xs font-bold text-[#3965FA]">{max} XLM</span>
+                <div className="text-right font-mono text-xs">
+                  <span className="font-bold text-[#3965FA]">{max} XLM</span>
+                  <span className="ml-1 text-[#99B7FC] text-[11px]">({convertXlmToUsd(max)})</span>
+                </div>
               </div>
               <input
                 type="range"
@@ -218,7 +220,7 @@ function Market() {
           )}
         </section>
       </div>
-    </LiquidGlassWrapper>
+    </div>
   );
 }
 
