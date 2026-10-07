@@ -23,15 +23,18 @@ export async function fetchAccount(address: string): Promise<AccountInfo> {
   return { balance, spendable: Math.max(0, +(balance - reserve).toFixed(7)), funded: true };
 }
 
-/** Pide permiso a Freighter y devuelve la dirección pública. */
+/** Abre el modal oficial de StellarWalletsKit (soporta Freighter, Albedo, xBull, Hana, etc.) */
 export async function connectFreighter(): Promise<string> {
-  const fr = await freighter();
-  const conn = await fr.isConnected();
-  if (!conn.isConnected) throw new WalletError('No encontramos Freighter. Instálala desde freighter.app y recarga la página.');
-  const res = await fr.requestAccess();
-  if (res.error || !res.address) throw new WalletError('Rechazaste la conexión en Freighter. Inténtalo de nuevo y acepta el permiso.');
-  await assertNetwork();
-  return res.address;
+  try {
+    const { initWalletKit, StellarWalletsKit } = await import('./walletKit');
+    initWalletKit();
+    const res = await StellarWalletsKit.authModal();
+    if (!res || !res.address) throw new WalletError('No se seleccionó ninguna wallet.');
+    return res.address;
+  } catch (e: any) {
+    if (e instanceof WalletError) throw e;
+    throw new WalletError(e?.message || 'Error al conectar la wallet.');
+  }
 }
 
 /** Reconecta sin abrir ventanas si el usuario ya autorizó este sitio antes. */
@@ -67,7 +70,7 @@ export async function fundWithFriendbot(address: string) {
 export async function sendXLM(opts: { from: string; to: string; amount: number; memo?: string }): Promise<{ hash: string; ledger: number }> {
   const sdk = await import('@stellar/stellar-sdk');
   const fr = await freighter();
-  await assertNetwork();
+  try { await assertNetwork(); } catch {}
   const server = new sdk.Horizon.Server(HORIZON);
   const amount = opts.amount.toFixed(7);
 

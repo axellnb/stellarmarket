@@ -1,25 +1,24 @@
-// Implementación compatible con la plantilla oficial grupo-5-main sin dependencias pesadas
-export interface WalletState {
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface WalletState {
   address: string | null;
   isConnected: boolean;
   setAddress: (address: string) => void;
   reset: () => void;
 }
 
-let currentAddress: string | null = null;
-const listeners: Array<() => void> = [];
-
-export function useWalletStore(): WalletState {
-  return {
-    address: currentAddress,
-    isConnected: !!currentAddress,
-    setAddress: (addr: string) => {
-      currentAddress = addr;
-      listeners.forEach(l => l());
-    },
-    reset: () => {
-      currentAddress = null;
-      listeners.forEach(l => l());
+export const useWalletStore = create<WalletState>()(
+  persist(
+    (set) => ({
+      address: null,
+      isConnected: false,
+      setAddress: (address) => set({ address, isConnected: true }),
+      reset: () => set({ address: null, isConnected: false }),
+    }),
+    {
+      name: 'stellar-wallet',
+      skipHydration: true,
     }
-  };
-}
+  )
+);
