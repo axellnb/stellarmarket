@@ -16,7 +16,27 @@ interface Ctx {
 const AppCtx = createContext<Ctx>(null as unknown as Ctx);
 export const useApp = () => useContext(AppCtx);
 
-const read = () => { try { return JSON.parse(localStorage.getItem('sm-state') || '{}'); } catch { return {}; } };
+const read = () => {
+  try {
+    const raw = localStorage.getItem('sm-state');
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return {};
+    if (parsed.user) {
+      if (typeof parsed.user !== 'object' || !parsed.user || typeof parsed.user.name !== 'string' || !parsed.user.role) {
+        localStorage.removeItem('sm-state');
+        return {};
+      }
+      if (!Array.isArray(parsed.user.prefs)) {
+        parsed.user.prefs = [];
+      }
+    }
+    return parsed;
+  } catch {
+    try { localStorage.removeItem('sm-state'); } catch {}
+    return {};
+  }
+};
 const persist = (patch: object) => { try { localStorage.setItem('sm-state', JSON.stringify({ ...read(), ...patch })); } catch {} };
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -35,23 +55,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setWallet({ address, ...acc });
   }, []);
 
-  const clearSession = useCallback(() => { setUserState(null); setWallet(null); persist({ user: null, wallet: null }); }, []);
+  const clearSession = useCallback(() => { setUserState(null); setWallet(null); try { localStorage.removeItem('sm-state'); } catch {} }, []);
 
   // Al abrir la app: valida la sesión en el servidor y reconecta la wallet si ya fue autorizada.
   useEffect(() => {
     (async () => {
-      const s = read();
-      if (s.user?.token) {
-        try {
-          const me = await api<User>('/api/me');
-          setUserState({ ...me, token: s.user.token });
-          if (s.wallet) { const a = await silentAddress(); if (a) await loadWallet(a).catch(() => {}); else persist({ wallet: null }); }
-        } catch {
-          // En versión de prueba, mantener la sesión localmente sin desloguear
-          setUserState(s.user);
+      try {
+        const s = read();
+        if (s.user?.token) {
+          try {
+            const me = await api<User>('/api/me');
+            setUserState({ ...me, token: s.user.token });
+            if (s.wallet) { const a = await silentAddress(); if (a) await loadWallet(a).catch(() => {}); else persist({ wallet: null }); }
+          } catch {
+            // En versión de prueba, mantener la sesión localmente sin desloguear
+            setUserState(s.user);
+          }
         }
+      } catch {
+        clearSession();
+      } finally {
+        setReady(true);
       }
-      setReady(true);
     })();
     const onUnauth = () => clearSession();
     window.addEventListener('sm-unauthorized', onUnauth);

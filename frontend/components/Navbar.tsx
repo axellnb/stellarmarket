@@ -85,10 +85,10 @@ export default function Navbar() {
             </div>
 
             <div className="relative" ref={menuRef}>
-              <button className="grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-mono text-sm text-brand hover:border-brand/60" onClick={() => setMenu(o => !o)} aria-label="Menú de cuenta">{user.name[0]?.toUpperCase()}</button>
+              <button className="grid h-9 w-9 place-items-center rounded-full border border-line bg-panel font-mono text-sm text-brand hover:border-brand/60" onClick={() => setMenu(o => !o)} aria-label="Menú de cuenta">{(user?.name?.[0] || 'U').toUpperCase()}</button>
               {menu && (
                 <div className="card absolute right-0 mt-2 w-52 overflow-hidden p-1 shadow-xl">
-                  <div className="px-3 py-2"><p className="truncate text-sm font-medium">{user.name}</p><p className="text-xs text-muted">{user.role === 'client' ? 'Cliente' : 'Freelancer'}</p></div>
+                  <div className="px-3 py-2"><p className="truncate text-sm font-medium">{user?.name || 'Usuario'}</p><p className="text-xs text-muted">{user?.role === 'client' ? 'Cliente' : 'Freelancer'}</p></div>
                   <button onClick={async () => { setMenu(false); await logout(); }} className="block w-full rounded-md border-t border-line px-3 py-2 text-left text-sm text-slate-300 hover:bg-line hover:text-red-400">Cerrar sesión</button>
                 </div>
               )}
