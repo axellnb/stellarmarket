@@ -127,6 +127,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Sección Pitch de Stellar en el MVP */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="rounded-3xl border border-brand/40 bg-gradient-to-br from-panel via-bg to-panel p-8 md:p-12 shadow-2xl">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-6">
+            <div>
+              <span className="rounded-full bg-brand/10 border border-brand/40 px-3 py-1 font-mono text-xs font-semibold text-brand">✦ Stellar Blockchain Pitch</span>
+              <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">¿Dónde entra la Red Stellar en este MVP?</h2>
+            </div>
+            <span className="font-mono text-xs text-muted">Testnet & Mainnet Ready</span>
+          </div>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="card p-5 space-y-2 border-line">
+              <span className="font-mono text-2xl text-brand">01</span>
+              <h3 className="font-semibold text-white">Wallet Freighter</h3>
+              <p className="text-xs text-slate-400">Autenticación y firma nativa mediante la extensión oficial de Stellar sin guardar llaves privadas en servidores.</p>
+            </div>
+            <div className="card p-5 space-y-2 border-line">
+              <span className="font-mono text-2xl text-brand">02</span>
+              <h3 className="font-semibold text-white">Pagos P2P en XLM</h3>
+              <p className="text-xs text-slate-400">Pagos directos de wallet a wallet a la clave pública del freelancer (`G...`) con comisión fija de 0.00001 XLM.</p>
+            </div>
+            <div className="card p-5 space-y-2 border-line">
+              <span className="font-mono text-2xl text-brand">03</span>
+              <h3 className="font-semibold text-white">Friendbot Faucet</h3>
+              <p className="text-xs text-slate-400">Integración directa con el Friendbot de Stellar para fondear cuentas de prueba con 10,000 XLM en 1 clic.</p>
+            </div>
+            <div className="card p-5 space-y-2 border-line">
+              <span className="font-mono text-2xl text-brand">04</span>
+              <h3 className="font-semibold text-white">Verificación Horizon</h3>
+              <p className="text-xs text-slate-400">Verificación inmediata on-chain en el explorador `stellar.expert` con hash de transacción y ledger indexado en ~5s.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Doble entrada */}
       <section className="mx-auto grid max-w-6xl gap-4 px-4 py-20 md:grid-cols-2">
         <Link href="/register?role=client" className="group rounded-2xl border border-sky/30 p-8 transition hover:border-sky"><p className="font-display text-2xl font-semibold">Quiero contratar</p><p className="mt-2 text-slate-400">Crea tu cuenta de cliente y explora el marketplace.</p><p className="mt-6 text-sky">Crear cuenta de cliente</p></Link>

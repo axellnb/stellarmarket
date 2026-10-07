@@ -29,7 +29,7 @@ function Access() {
   const dest = (u: User) => {
     const next = safeNext(sp.get('next'));
     if (next && next !== '/profile/create') return next;
-    return '/marketplace';
+    return u.role === 'freelancer' ? '/profile/create' : '/marketplace';
   };
   // Si el usuario ya está conectado y no seleccionó rol o modo en la URL, ir a su destino.
   useEffect(() => {
@@ -64,8 +64,8 @@ function Access() {
       u = res.user;
     } catch {
       // Modo de prueba: si falla el servidor o es usuario nuevo, permitir ingresar con cualquier correo y contraseña
-      const cleanEmail = email.trim().toLowerCase();
-      const derivedName = name.trim() || cleanEmail.split('@')[0] || 'Usuario Test';
+      const cleanEmail = email.trim().toLowerCase() || (role === 'client' ? 'cliente@stellarwork.app' : 'freelancer@stellarwork.app');
+      const derivedName = name.trim() || cleanEmail.split('@')[0] || (role === 'client' ? 'Cliente Demo' : 'Freelancer Demo');
       u = {
         name: derivedName,
         email: cleanEmail,
@@ -127,8 +127,8 @@ function Access() {
                   className="chip" style={mode === m ? { borderColor: A, color: A } : undefined}>{m === 'register' ? 'Crear cuenta' : 'Iniciar sesión'}</button>
               ))}
             </div>
-            {mode === 'register' && <input className="input" required autoFocus placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} />}
-            <input className="input" required type="email" autoFocus={mode === 'login'} placeholder="Correo" value={email} onChange={e => setEmail(e.target.value)} />
+            {mode === 'register' && <input className="input" autoFocus placeholder="Nombre (ej. María González)" value={name} onChange={e => setName(e.target.value)} />}
+            <input className="input" type="text" autoFocus={mode === 'login'} placeholder="Correo o usuario (ej. maria@stellarwork.app)" value={email} onChange={e => setEmail(e.target.value)} />
             <input className="input" type="password" placeholder="Contraseña (opcional para prueba)" value={password} onChange={e => setPassword(e.target.value)} />
             {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
             <button className="w-full rounded-lg py-3 text-sm font-semibold text-bg transition hover:brightness-110 disabled:opacity-50" style={{ background: A }} disabled={busy}>
