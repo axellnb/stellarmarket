@@ -3,7 +3,7 @@ import Stars from './Stars';
 
 // Carrusel horizontal infinito; se pausa al pasar el mouse
 export default function ReviewMarquee({ reviews }: { reviews: Review[] }) {
-  if (!reviews.length) return <p className="text-sm text-muted">Todavía no hay opiniones. ¡Sé el primero!</p>;
+  if (!reviews || !reviews.length) return <p className="text-sm text-muted">Todavía no hay opiniones. ¡Sé el primero!</p>;
   let base = reviews.slice();
   while (base.length < 6) base = [...base, ...reviews];
   const mask = 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent)';

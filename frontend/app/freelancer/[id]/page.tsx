@@ -81,4 +81,4 @@ function ProfileInner() {
   );
 }
 
-export default function Profile() { return <RequireAuth><ProfileInner /></RequireAuth>; }
+export default function Profile() { return <RequireAuth allowGuest><ProfileInner /></RequireAuth>; }

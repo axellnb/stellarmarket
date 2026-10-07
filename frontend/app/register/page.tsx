@@ -28,8 +28,8 @@ function Access() {
 
   const dest = (u: User) => {
     const next = safeNext(sp.get('next'));
-    if (next) return next;
-    return u.role === 'client' ? (u.prefs?.length ? '/marketplace' : '/preferences') : u.profileId ? `/freelancer/${u.profileId}` : '/profile/create';
+    if (next && next !== '/profile/create') return next;
+    return '/marketplace';
   };
   // Si el usuario ya está conectado y no seleccionó rol o modo en la URL, ir a su destino.
   useEffect(() => {
@@ -48,7 +48,8 @@ function Access() {
       prefs: []
     };
     setUser(guestUser);
-    const next = safeNext(sp.get('next')) || '/marketplace';
+    const rawNext = safeNext(sp.get('next'));
+    const next = (rawNext && rawNext !== '/profile/create') ? rawNext : '/marketplace';
     router.push(next);
   };
 
